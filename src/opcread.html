@@ -74,20 +74,50 @@
     var connected = function(the_session){
       var local_session = the_session;
       setTimeout(function(){
+        var nodesToRead = [
+            {
+                nodeId:      "ns=4;s=MAIN.ex_struct",
+                attributeId: opcua.AttributeIds.DataType
+            }
+        ];
         //console.log("-------------------------\n read a variable with readVariableValue!!! \n -------------------------------\n");
           //console.log(the_session)
-        local_session.readVariableValue("ns=4;s=MAIN.arr1", function(err,dataValue) {
+        //local_session.readVariableValue("ns=4;s=MAIN.ex_struct.aPoint1", function(err,dataValue) {
+        //local_session.read(nodesToRead, function(err,dataValue) {
+        local_session.browse("ns=4;s=MAIN.ex_struct", function(err,dataValue) {
             if (!err) {
-                console.log("increment:  " + dataValue.value.value + "\n");
-                value_display.innerHTML = dataValue.value.value[254]
-                value_display2.innerHTML = dataValue.value.value[1]
-                value_display3.innerHTML = dataValue.value.value[50]
-                value_display4.innerHTML = dataValue.value.value[100]
-                value_display5.innerHTML = dataValue.value.value[150]
-
+                //console.log("increment:  " + dataValue.value.value + "\n");
+                // value_display.innerHTML = dataValue.value.value[254]
+                // value_display2.innerHTML = dataValue.value.value[1]
+                // value_display3.innerHTML = dataValue.value.value[50]
+                // value_display4.innerHTML = dataValue.value.value[100]
+                // value_display5.innerHTML = dataValue.value.value[150]
+                console.log("ex_struct: ", dataValue)
+                debugger
                 //console.log(" free mem % = " , dataValue.toString());
             }
-            //callback(err);
+            var nodeToWrite = [
+                {
+                    nodeId: "ns=4;s=MAIN.count",
+                    attributeId: 1,
+                    indexRange: 0,
+                    value: {dataType: "Int16", value: 24}
+                }
+            ];
+            var dataToWrite = {
+                dataType: "Int16",
+                value: 23
+            };
+            the_session.writeSingleNode("ns=4;s=MAIN.count" ,dataToWrite, function(err,statusCode,diagnosticInfo) {
+                if (!err) {
+                    console.log(" write ok" );
+                    console.log("diagnostic info : ",diagnosticInfo);
+                    console.log("status code: ", statusCode);
+                }
+                console.log("err: ",  err);
+            });    
+        
+            // //cal  lback(err);
         });
 
         connected(local_session)
