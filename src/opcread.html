@@ -82,8 +82,11 @@
         ];
         //console.log("-------------------------\n read a variable with readVariableValue!!! \n -------------------------------\n");
           //console.log(the_session)
+        // siply read out the value of variables, or even arrays, couldnt use for struct in the first round
         //local_session.readVariableValue("ns=4;s=MAIN.ex_struct.aPoint1", function(err,dataValue) {
+        // this can be used to read specific attributes, Do I need this
         //local_session.read(nodesToRead, function(err,dataValue) {
+        // this can be used t browse the structure of the sctructure
         local_session.browse("ns=4;s=MAIN.ex_struct", function(err,dataValue) {
             if (!err) {
                 //console.log("increment:  " + dataValue.value.value + "\n");
