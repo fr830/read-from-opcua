@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>OPC Read</title>
+    <link rel="stylesheet" href="C:\Users\Gergo Halmi\Desktop\Electron_Projects\read-from-opc\css\app.css">
+  </head>
+  <body>
+    <h1>Hello OPC Read for you</h1>
+    <button type="button" name="button" id="start">Start</button>
+    <p id="value" class="values">Wait To start</p>
+    <p id="value2" class="values">Wait To start</p>
+    <p id="value3" class="values">Wait To start</p>
+    <p id="value4" class="values">Wait To start</p>
+    <p id="value5" class="values">Wait To start</p>
+    <button type="button" name="button" id="restart">Restart</button>
+  </body>
+  <script>
+      /*global require,console,setTimeout */
+    var opcua = require("node-opcua");
+    var async = require("async");
+
+
+    var client = new opcua.OPCUAClient();
+    var endpointUrl = "opc.tcp://DESKTOP-KEFSSJM:4840";
+    //var endpointUrl = "opc.tcp://DESKTOP-KEFSSJM:48056";
+
+    const EventEmitter = require('events');
+
+    class MyEmitter extends EventEmitter {}
+
+    const myEmitter = new MyEmitter();
+
+
+    var the_session, the_subscription;
+
+    var element = document.getElementById('start').addEventListener("click", _=>{
+        async.series([
+
+          // step 1 : connect to
+          function(callback)  {
+              console.log("-------------------------\n Connect !!  \n -------------------------------\n")
+              client.connect(endpointUrl,function (err) {
+                  if(err) {
+                      console.log(" cannot connect to endpoint :" , endpointUrl );
+                  } else {
+                      console.log("connected !");
+                  }
+                  callback(err);
+              });
+          },
+
+          // step 2 : createSession
+          function(callback) {
+              console.log("-------------------------\n Create Session !!  \n -------------------------------\n");
+              client.createSession( function(err,session) {
+                  if(!err) {
+                      the_session = session;
+                      myEmitter.emit("connected",the_session);
+                  }
+                  callback(err);
+              });
+          }
+      ]);
+    })
+
+
+
+    var value_display = document.getElementById('value')
+    var value_display2 = document.getElementById('value2')
+    var value_display3 = document.getElementById('value3')
+    var value_display4 = document.getElementById('value4')
+    var value_display5 = document.getElementById('value5')
+    var connected = function(the_session){
+      var local_session = the_session;
+      setTimeout(function(){
+        //console.log("-------------------------\n read a variable with readVariableValue!!! \n -------------------------------\n");
+          //console.log(the_session)
+        local_session.readVariableValue("ns=4;s=MAIN.arr1", function(err,dataValue) {
+            if (!err) {
+                console.log("increment:  " + dataValue.value.value + "\n");
+                value_display.innerHTML = dataValue.value.value[254]
+                value_display2.innerHTML = dataValue.value.value[1]
+                value_display3.innerHTML = dataValue.value.value[50]
+                value_display4.innerHTML = dataValue.value.value[100]
+                value_display5.innerHTML = dataValue.value.value[150]
+
+                //console.log(" free mem % = " , dataValue.toString());
+            }
+            //callback(err);
+        });
+
+        connected(local_session)
+      },100)
+    }
+
+    myEmitter.on("connected", (the_session) =>{
+      //console.log(the_session)
+        connected(the_session)
+    })
+  </script>
+</html>
